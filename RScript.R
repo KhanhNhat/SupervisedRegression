@@ -138,3 +138,14 @@ table(sparrow$survived, ifelse(sparrow$pred > 0.5, TRUE, FALSE))
 
 GainCurvePlot(sparrow, 'pred', 'survived', title = 'Sparrow survival model')
 
+#Use Poisson or QuasiPoisson to predict count variable ( 0 - Inf)
+mean(bikesJuly$cnt)
+var(bikesJuly$cnt)
+
+#Because var >> mean, so that we use 'quasipoisson'
+bike_model = glm(cnt ~ ., data = bikesJuly[-c(11,12)], family = 'quasipoisson')
+
+#Calculate pseudo R2
+bike_model_prop = glance(bike_model)
+1 - bike_model_prop$deviance/bike_model_prop$null.deviance
+
