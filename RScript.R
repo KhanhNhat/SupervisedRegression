@@ -149,3 +149,27 @@ bike_model = glm(cnt ~ ., data = bikesJuly[-c(11,12)], family = 'quasipoisson')
 bike_model_prop = glance(bike_model)
 1 - bike_model_prop$deviance/bike_model_prop$null.deviance
 
+#Now use model to predict bike rents in August
+bikesAugust$pred = predict(bike_model, bikesAugust, type = 'response')
+
+#Calculate RSME
+bikesAugust %>%
+  mutate(residual = pred - cnt) %>%
+  summarise(rsme = sqrt(mean(residual^2)))
+
+#Plot prediction vs actual
+ggplot(bikesAugust, aes(x = pred, y = cnt)) +
+  geom_point() +
+  geom_abline(col = 'blue', size = 1)
+
+#Plot prediction and cnt by datetime
+bikesAugust %>%
+  mutate(dayOfMonth = (instant - min(instant))/24) %>%
+  gather(key = valueType, value = value, pred, cnt) %>%
+  filter(dayOfMonth < 14) %>%
+  ggplot(aes(x = dayOfMonth, y = value, col = valueType, linetype = valueType)) +
+    geom_point() +
+    geom_line() +
+    scale_x_continuous('Day of Month', breaks = 0:14, labels = 0:14) +
+    scale_color_brewer(palette = 'Dark2') +
+    ggtitle('Predict vs Actual Bike Rentals, Quasipoisson Model')
