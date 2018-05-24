@@ -129,3 +129,12 @@ sparrow_model_prop = glance(sparrow_model)
 #Calculate pseudo-R2:
 1 - sparrow_model_prop$deviance/sparrow_model_prop$null.deviance
 
+#Predict probability
+sparrow$pred = predict(sparrow_model, type = 'response')
+
+#To calculate the accuracy, accuracy = total of correct predict/total of all predict
+#This accuracy can change by modify the threshold, in this case, threshold is 0.5
+table(sparrow$survived, ifelse(sparrow$pred > 0.5, TRUE, FALSE))
+
+GainCurvePlot(sparrow, 'pred', 'survived', title = 'Sparrow survival model')
+
