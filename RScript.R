@@ -110,3 +110,22 @@ alcohol %>%
   group_by(modelType) %>%
   mutate(residuals = Metabol - pred) %>%
   summarise(rsme = sqrt(mean(residuals^2)))
+
+ggplot(alcohol, aes(x = Metabol, y = pred_mainEffect)) +
+  geom_point(col = 'blue') +
+  geom_point(aes(y = pred_interaction), col = 'green') +
+  geom_abline()
+
+
+#Study Logistic Regression to predict Probabiliy
+sparrow = read.csv('sparrow.csv', row.names = 1)
+sparrow$survived = ifelse(sparrow$status == 'Survived', TRUE, FALSE)
+
+sparrow_model = glm(survived ~ total_length + weight + humerus, data = sparrow, family = 'binomial')
+
+summary(sparrow_model)
+sparrow_model_prop = glance(sparrow_model)
+
+#Calculate pseudo-R2:
+1 - sparrow_model_prop$deviance/sparrow_model_prop$null.deviance
+
