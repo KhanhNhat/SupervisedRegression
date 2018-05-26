@@ -173,3 +173,33 @@ bikesAugust %>%
     scale_x_continuous('Day of Month', breaks = 0:14, labels = 0:14) +
     scale_color_brewer(palette = 'Dark2') +
     ggtitle('Predict vs Actual Bike Rentals, Quasipoisson Model')
+
+#Tree-Based Method
+
+#1. Random Forest
+#Load package
+library(ranger)
+
+bike_model_rf = ranger(cnt ~ ., data = bikesJuly[-c(11, 12)], 
+                       num.trees = 500, respect.unordered.factors = 'order')
+
+#Predict value and calculate rsme
+bikesAugust$pred_rf = predict(bike_model_rf, bikesAugust)$predictions
+
+bikesAugust %>%
+  mutate(residual = cnt - pred) %>%
+  summarise(rsme = sqrt(mean(residual^2)))
+
+bikesAugust[c('cnt', 'pred', 'pred_rf')] %>%
+  gather(key = modelType, value = prediction, pred, pred_rf) %>%
+  ggplot(aes(x = prediction, y = cnt, col = modelType)) +
+  geom_point() +
+  geom_abline() +
+  ggtitle('Random Forest vs Quasipoison') +
+  ylab('Actual value') +
+  xlab('Prediction value') +
+  scale_color_manual(name = 'Model Type', 
+                     values = c('blue', 'green'), 
+                     labels = c('Quasipoisson', 'Random Forest')) +
+  coord_equal()
+  
